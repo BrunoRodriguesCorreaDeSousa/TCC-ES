@@ -14,7 +14,7 @@ def main():
     files = []
     for file in os.listdir("videos"):
         if file.endswith(".mp4"):
-            files.append(os.path.join("videos", file))
+            files.append(file)
 
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
@@ -39,10 +39,10 @@ def main():
         sticky=customtkinter.W, column=0, row=2)
 
     def run():
-        video = cv2.VideoCapture(files[0], cv2.CAP_ANY, (cv2.CAP_PROP_HW_ACCELERATION, cv2.VIDEO_ACCELERATION_ANY))
+        video = cv2.VideoCapture(f"videos/{files[0]}", cv2.CAP_ANY, (cv2.CAP_PROP_HW_ACCELERATION, cv2.VIDEO_ACCELERATION_ANY))
         match source.get():
             case 'f':
-                video = cv2.VideoCapture(cb.get(), cv2.CAP_ANY,
+                video = cv2.VideoCapture(f"videos/{cb.get()}", cv2.CAP_ANY,
                                          (cv2.CAP_PROP_HW_ACCELERATION, cv2.VIDEO_ACCELERATION_ANY))
             case 'c':
                 video = cv2.VideoCapture(0, cv2.CAP_ANY,
