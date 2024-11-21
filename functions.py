@@ -14,12 +14,11 @@ with warnings.catch_warnings(action="ignore"):
 
 # Variáveis globais
 seed = random.randint(0, 2 ** 31 - 1)  # Gera uma seed pseudo-aleatória.
-prev_frame_time = new_frame_time = gc = 0
+prev_frame_time = new_frame_time = 0
 
 
 # Verifica as classes detectadas e desenha as caixas delimitadoras.
 def detect(frame, boxes, labels, score=False):
-    global gc
     detected = False
     # Abre um arquivo de log para escrever as detecções.
     logfile = open(f"{datetime.now().date()}.log", "a")
@@ -29,16 +28,11 @@ def detect(frame, boxes, labels, score=False):
     # Loop para iterar sobre cada uma das caixas delimitadoras.
     for box in boxes:
         # Seleciona o rótulo referente à classe da caixa atual e adiciona o nível de confiança ao rótulo caso score=True.
-        if int(box[-1]) != 0:  # O último valor do tensor é referente à classe prevista. Verifica se o modelo detectou a classe.
+        if labels[int(box[-1])] != "Person" or "Car":  # O último valor do tensor é referente à classe prevista. Verifica se o modelo detectou a classe.
             # Escreve a classe detectada e o horário da detecção no arquivo de log.
             logfile.write(f"{labels[int(box[-1])]} detected at {datetime.now().time()}\n")
-            if not detected:
-                if gc < 15:
-                    gc += 1
-                else:
-                    detected = True
-        elif gc > 0:
-            gc = 0
+            if not detected and labels[int(box[-1])] == "Threat":
+                detected = True
         if score:
             label = labels[int(box[-1])] + " " + str(round(100 * float(box[-2]), 1)) + "%"
         else:
@@ -84,8 +78,8 @@ def show_fps(frame):
 
 # Executa o modelo.
 def run_model(video, window):
-    global new_frame_time, prev_frame_time, gc
-    prev_frame_time = new_frame_time = gc = 0
+    global new_frame_time, prev_frame_time
+    prev_frame_time = new_frame_time = 0
     model = YOLO("runs/detect/crime/weights/last.pt")
     v = video.read()[1]
     w, h = resize(v.shape[1], v.shape[0], 640)
